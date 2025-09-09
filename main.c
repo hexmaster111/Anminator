@@ -3,6 +3,23 @@
 
 #include "betterlist.h"
 
+typedef struct DropShadow_RenderConfig
+{
+    enum
+    {
+        FT_NORMAL,
+        FT_DROPSHADOW
+    } type;
+    union
+    {
+        struct
+        {
+            Vector2 offset;
+            Color color;
+        } ds;
+    };
+} DropShadow_RenderConfig;
+
 // -TURTLES
 
 enum Shape
@@ -151,7 +168,7 @@ void FadeText_Update(FadeText *ft, int speed)
 
 bool FadeText_Done(FadeText *tf) { return tf->cur_pos >= tf->word.count; }
 
-void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize)
+void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_RenderConfig cfg)
 {
     // i guess this is a memory leek ? not really alloc once and then deallocd by the OS
     static ListOfChar tmp_text_buffer;
@@ -168,7 +185,15 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize)
 
     Font font = tf->font != 0 ? *tf->font : GetFontDefault();
 
+    if (cfg.type == FT_DROPSHADOW)
+    {
+        Vector2 newpos = Vector2Add(cfg.ds.offset, pos);
+        DrawTextEx(font, tmp_text_buffer.items, newpos, fontsize, 1, cfg.ds.color);
+    }
+
+    
     DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->target_color);
+
 
     Vector2 already_drawn_size = MeasureTextEx(font, tmp_text_buffer.items, fontsize, 1);
 
@@ -205,6 +230,12 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize)
     pos.x = on_line_len.x;
 
     DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->work_color);
+
+    if (cfg.type == FT_DROPSHADOW)
+    {
+        pos = Vector2Add(cfg.ds.offset, pos);
+        DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, cfg.ds.color);
+    }
 }
 
 Font Font_SpaceMono;
@@ -220,149 +251,30 @@ int main(int argc, char *argv[])
     Font_SpaceMono = LoadFontEx("SpaceMono-Regular.ttf", 48, NULL, 0);
     SetTextureFilter(Font_SpaceMono.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
-#define TF_LINE(VARNAME, CATAGORY, TEXTLINE)            \
-    FadeText VARNAME = {0};                             \
-    VARNAME.word.items = CATAGORY TEXTLINE;             \
-    VARNAME.word.count = sizeof(CATAGORY TEXTLINE);     \
-    VARNAME.target_color = (Color){255, 255, 255, 255}; \
-    VARNAME.work_color = VARNAME.target_color;          \
-    VARNAME.font = &Font_SpaceMono;
+#define HELLOWORLDTEXT "This is an example of speeks,\n a text to speach engine designed to make\n hailey keep talking"
 
-    TF_LINE(tf_name, "NAME:      ", NAME);
-    TF_LINE(tf_age, "AGE:       ", AGE);
-    TF_LINE(tf_gender, "GENDER:    ", GENDER);
-    TF_LINE(tf_PRONOUNS, "PRONOUNS:  ", PRONOUNS);
-    TF_LINE(tf_LOCATION, "LOCATION:  ", LOCATION);
-    TF_LINE(tf_DM_STATUS, "DM_STATUS: ", DM_STATUS);
-    TF_LINE(tf_ROLE, "ROLE:      ", ROLE);
-    TF_LINE(tf_INFO, "INFO: ", INFO);
-    TF_LINE(tf_HOBBIES, "HOBBIES:   ", HOBBIES);
-    TF_LINE(tf_KINKS, "KINKS:   ", KINKS);
-    TF_LINE(tf_KINKS2, "", KINKS2);
-    TF_LINE(tf_UPDATED, "page last updated:   ", UPDATED);
-
-    tf_KINKS.work_color = PURPLE;
-    tf_KINKS.target_color = PURPLE;
-
-    tf_KINKS2.work_color = PURPLE;
-    tf_KINKS2.target_color = PURPLE;
-
-    Turtle t = {0};
-
-    float start_angle = 0;
-
-    size_t arms = 12;
+    FadeText tf_name = {0};
+    tf_name.word.items = HELLOWORLDTEXT;
+    tf_name.word.count = sizeof(HELLOWORLDTEXT);
+    tf_name.target_color = (Color){255, 255, 255, 255};
+    tf_name.work_color = tf_name.target_color;
+    tf_name.font = &Font_SpaceMono;
+    ;
 
     while (!WindowShouldClose())
     {
 
         if (IsKeyDown(KEY_SPACE))
         {
-
             FadeText_Update(&tf_name, 1);
-
-            if (FadeText_Done(&tf_name))
-            {
-                FadeText_Update(&tf_age, 1);
-            }
-
-            if (FadeText_Done(&tf_name))
-
-                if (FadeText_Done(&tf_age))
-                {
-                    FadeText_Update(&tf_gender, 1);
-                }
-
-            if (FadeText_Done(&tf_name))
-                FadeText_Update(&tf_PRONOUNS, 1);
-
-            if (FadeText_Done(&tf_PRONOUNS))
-            {
-                FadeText_Update(&tf_LOCATION, 1);
-            }
-
-            if (FadeText_Done(&tf_name))
-                FadeText_Update(&tf_DM_STATUS, 1);
-
-            if (FadeText_Done(&tf_name))
-                FadeText_Update(&tf_ROLE, 1);
-
-            if (FadeText_Done(&tf_name))
-                FadeText_Update(&tf_INFO, 5);
-
-            if (FadeText_Done(&tf_name))
-            {
-                FadeText_Update(&tf_HOBBIES, 3);
-            }
-
-            if (FadeText_Done(&tf_name))
-                if (FadeText_Done(&tf_INFO))
-                {
-                    FadeText_Update(&tf_UPDATED, 1);
-                }
-
-            if (FadeText_Done(&tf_name))
-            {
-                FadeText_Update(&tf_KINKS, 3);
-            }
-
-            if (FadeText_Done(&tf_name))
-            {
-                FadeText_Update(&tf_KINKS2, 3);
-            }
-        }
-
-        Turtle_PenDown(&t, RAYWHITE, 1);
-        t.rotation = start_angle;
-
-        start_angle -= 0.2;
-
-        for (size_t x = 0; x < arms; x++)
-        {
-            Turtle_Goto(&t, (Vector2){GetScreenWidth() - 100, 100});
-
-            Turtle_Turn(&t, 360.0 / arms);
-
-            for (size_t i = 0; i < 6; i++)
-            {
-                Turtle_Turn(&t, 30.0);
-                Turtle_Line(&t, 20.0 + ((sin(start_angle * DEG2RAD) + .1) * 50) + (i * 5));
-                Turtle_Stamp(&t, S_Circle, WHITE, 5);
-            }
         }
 
         BeginDrawing();
 
         ClearBackground(BLACK);
-
-        int y_iota = 10;
-#define FONT_SIZE (48)
-        FadeText_Render(&tf_name, (Vector2){10, y_iota}, 48);
-        FadeText_Render(&tf_age, (Vector2){10, y_iota += FONT_SIZE}, 48);
-        FadeText_Render(&tf_gender, (Vector2){10, y_iota += FONT_SIZE}, 48);
-        FadeText_Render(&tf_PRONOUNS, (Vector2){10, y_iota += FONT_SIZE}, 48);
-        FadeText_Render(&tf_LOCATION, (Vector2){10, y_iota += FONT_SIZE}, 48);
-        FadeText_Render(&tf_DM_STATUS, (Vector2){10, y_iota += FONT_SIZE}, 48);
-        FadeText_Render(&tf_ROLE, (Vector2){10, y_iota += FONT_SIZE}, 48);
-
-        FadeText_Render(&tf_INFO, (Vector2){10, y_iota += 38}, 30);
-
-        y_iota += 38 * 3;
-
-#define LIST_FONTSIZE (38)
-        FadeText_Render(&tf_HOBBIES, (Vector2){10, y_iota += LIST_FONTSIZE}, LIST_FONTSIZE);
-        FadeText_Render(&tf_KINKS, (Vector2){200, y_iota += LIST_FONTSIZE}, LIST_FONTSIZE);
-        FadeText_Render(&tf_KINKS2, (Vector2){500, y_iota += LIST_FONTSIZE}, LIST_FONTSIZE);
-
-        y_iota += LIST_FONTSIZE * 6.5;
-
-        FadeText_Render(&tf_UPDATED, (Vector2){10, y_iota += LIST_FONTSIZE}, 28);
-
-        Turtle_Draw(&t);
+        FadeText_Render(&tf_name, (Vector2){10, 10}, 48, (DropShadow_RenderConfig){.type = FT_DROPSHADOW, .ds = {.offset = {2, 2}, .color = RED}});
 
         EndDrawing();
-
-        Turtle_Clear(&t);
     }
 
     return 0;
