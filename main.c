@@ -102,7 +102,16 @@ void Turtle_PenDown(Turtle *t, Color c, float size)
 void Turtle_PenUp(Turtle *t) { t->pen_down = false; }
 
 void Turtle_Goto(Turtle *t, Vector2 pos) { t->pos = pos; }
-void Turtle_Turn(Turtle *t, float angle) { t->rotation += angle; }
+void Turtle_Turn(Turtle *t, float angle)
+{
+    t->rotation += angle;
+    if (t->rotation > 360)
+    {
+        t->rotation -= 360;
+    }
+
+
+}
 
 void Turtle_Line(Turtle *t, float length)
 {
@@ -291,12 +300,6 @@ int main(int argc, char *argv[])
                 Turtle_Goto(&t, turtle_center);
                 float last_angle = t.rotation;
 
-                // for (size_t x = 0; x < 7; x++)
-                // {
-                //     Turtle_Line(&t, 30);
-                //     Turtle_Turn(&t, 30);
-                // }
-
                 for (size_t x = 7; x > 0; x--)
                 {
                     Turtle_Line(&t, 30);
@@ -308,7 +311,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        t.rotation -= 0.1;
+        Turtle_Turn(&t, -0.1);
 
         Turtle_Draw(&t);
         // FadeText_Render(&tf_name, (Vector2){10, 10}, 48, (DropShadow_RenderConfig){.type = FT_DROPSHADOW, .ds = {
@@ -317,7 +320,7 @@ int main(int argc, char *argv[])
         //                                                                                                   }});
 
         GuiSlider((Rectangle){100, 10, 200, 10}, "", "", &TURN_FACTOR, -3, 3);
-        DrawText(TextFormat("%f"), 10,30,12,GREEN);
+        DrawText(TextFormat("%10.2f", t.rotation), 10, 30, 12, GREEN);
 
         EndDrawing();
     }
