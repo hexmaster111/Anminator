@@ -1,6 +1,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 #include "betterlist.h"
 
 typedef struct DropShadow_RenderConfig
@@ -191,9 +194,7 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
         DrawTextEx(font, tmp_text_buffer.items, newpos, fontsize, 1, cfg.ds.color);
     }
 
-    
     DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->target_color);
-
 
     Vector2 already_drawn_size = MeasureTextEx(font, tmp_text_buffer.items, fontsize, 1);
 
@@ -229,18 +230,16 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
     pos.y -= fontsize;
     pos.x = on_line_len.x;
 
-    DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->work_color);
-
     if (cfg.type == FT_DROPSHADOW)
     {
         pos = Vector2Add(cfg.ds.offset, pos);
         DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, cfg.ds.color);
     }
+
+    DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->work_color);
 }
 
 Font Font_SpaceMono;
-
-#include "bio.c"
 
 int main(int argc, char *argv[])
 {
@@ -259,7 +258,10 @@ int main(int argc, char *argv[])
     tf_name.target_color = (Color){255, 255, 255, 255};
     tf_name.work_color = tf_name.target_color;
     tf_name.font = &Font_SpaceMono;
-    ;
+
+    Turtle t = {0};
+
+    float TURN_FACTOR = 0;
 
     while (!WindowShouldClose())
     {
@@ -272,7 +274,50 @@ int main(int argc, char *argv[])
         BeginDrawing();
 
         ClearBackground(BLACK);
-        FadeText_Render(&tf_name, (Vector2){10, 10}, 48, (DropShadow_RenderConfig){.type = FT_DROPSHADOW, .ds = {.offset = {2, 2}, .color = RED}});
+
+        DrawFPS(0, 0);
+
+        const Vector2 turtle_center = {GetScreenWidth() / 2.0, GetScreenHeight() / 2.0};
+
+        Turtle_Clear(&t);
+        Turtle_PenDown(&t, WHITE, 2);
+
+        for (size_t w = 0; w < 3; w++)
+        {
+            Turtle_Turn(&t, 360 / 3);
+
+            for (size_t i = 0; i < 2; i++)
+            {
+                Turtle_Goto(&t, turtle_center);
+                float last_angle = t.rotation;
+
+                // for (size_t x = 0; x < 7; x++)
+                // {
+                //     Turtle_Line(&t, 30);
+                //     Turtle_Turn(&t, 30);
+                // }
+
+                for (size_t x = 7; x > 0; x--)
+                {
+                    Turtle_Line(&t, 30);
+                    Turtle_Turn(&t, 30 - (x * TURN_FACTOR));
+                }
+
+                t.rotation = last_angle;
+                Turtle_Turn(&t, 180);
+            }
+        }
+
+        t.rotation -= 0.1;
+
+        Turtle_Draw(&t);
+        // FadeText_Render(&tf_name, (Vector2){10, 10}, 48, (DropShadow_RenderConfig){.type = FT_DROPSHADOW, .ds = {
+        //                                                                                                       .offset = {2, 2},
+        //                                                                                                       .color = RED,
+        //                                                                                                   }});
+
+        GuiSlider((Rectangle){100, 10, 200, 10}, "", "", &TURN_FACTOR, -3, 3);
+        DrawText(TextFormat("%f"), 10,30,12,GREEN);
 
         EndDrawing();
     }
