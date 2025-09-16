@@ -10,7 +10,6 @@
 typedef char Char;
 
 ListDef(Char);
-ListImpl(Char);
 
 typedef struct DropShadow_RenderConfig
 {
@@ -57,6 +56,8 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
 
 #ifdef TEXTFADE_IMPL
 #undef TEXTFADE_IMPL
+
+ListImpl(Char);
 
 
 ssize_t Char_ListIndexOfLast(ListOfChar *l, Char find)

@@ -19,7 +19,6 @@ typedef struct Stamp
 } Stamp;
 
 ListDef(Stamp);
-ListImpl(Stamp);
 
 typedef struct Line
 {
@@ -29,7 +28,6 @@ typedef struct Line
 } Line;
 
 ListDef(Line);
-ListImpl(Line);
 
 typedef struct Turtle
 {
@@ -56,6 +54,9 @@ void Turtle_Stamp(Turtle *t, enum Shape shape, Color c, float size);
 
 #ifdef TURTLE_IMPL
 
+
+ListImpl(Stamp);
+ListImpl(Line);
 
 
 
