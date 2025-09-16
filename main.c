@@ -109,8 +109,6 @@ void Turtle_Turn(Turtle *t, float angle)
     {
         t->rotation -= 360;
     }
-
-
 }
 
 void Turtle_Line(Turtle *t, float length)
@@ -250,6 +248,24 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
 
 Font Font_SpaceMono;
 
+static float branch_angle = 30;
+static int tree_levels = 2;
+
+void Turtle_Tree(Turtle *t, int size, int level)
+{
+
+    if (level <= 0)
+        return;
+
+    Turtle_Line(t, size);
+    Turtle_Turn(t, branch_angle);
+    Turtle_Tree(t, 0.8 * size, level - 1);
+    Turtle_Turn(t, -(branch_angle * 2));
+    Turtle_Tree(t, 0.8 * size, level - 1);
+    Turtle_Turn(t, branch_angle);
+    Turtle_Line(t, -size);
+}
+
 int main(int argc, char *argv[])
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
@@ -268,9 +284,13 @@ int main(int argc, char *argv[])
     tf_name.work_color = tf_name.target_color;
     tf_name.font = &Font_SpaceMono;
 
-    Turtle t = {0};
+    Turtle spirle = {0};
 
-    float TURN_FACTOR = 0;
+    Turtle tree = {0};
+
+    float arm_factor = 0;
+
+    const Vector2 turtle_center = {GetScreenWidth() / 2.0, GetScreenHeight() / 2.0};
 
     while (!WindowShouldClose())
     {
@@ -286,43 +306,54 @@ int main(int argc, char *argv[])
 
         DrawFPS(0, 0);
 
-        const Vector2 turtle_center = {GetScreenWidth() / 2.0, GetScreenHeight() / 2.0};
+        // Turtle_Clear(&spirle);
+        // Turtle_PenDown(&spirle, WHITE, 2);
+        // for (size_t w = 0; w < 3; w++)
+        // {
+        //     Turtle_Turn(&spirle, 360 / 3);
+        //     for (size_t i = 0; i < 2; i++)
+        //     {
+        //         Turtle_Goto(&spirle, turtle_center);
+        //         float last_angle = spirle.rotation;
+        //         for (size_t x = 7; x > 0; x--)
+        //         {
+        //             Turtle_Line(&spirle, 30);
+        //             Turtle_Turn(&spirle, 30 - (x * arm_factor));
+        //         }
+        //         spirle.rotation = last_angle;
+        //         Turtle_Turn(&spirle, 180);
+        //     }
+        // }
+        // Turtle_Turn(&spirle, -0.1);
+        // Turtle_Draw(&spirle);
 
-        Turtle_Clear(&t);
-        Turtle_PenDown(&t, WHITE, 2);
+        Turtle_Clear(&tree);
+        Turtle_PenDown(&tree, WHITE, 1);
+        Turtle_Goto(&tree, turtle_center);
+        tree.rotation = -90;
 
-        for (size_t w = 0; w < 3; w++)
-        {
-            Turtle_Turn(&t, 360 / 3);
+        
 
-            for (size_t i = 0; i < 2; i++)
-            {
-                Turtle_Goto(&t, turtle_center);
-                float last_angle = t.rotation;
+        Turtle_Tree(&tree, 100, tree_levels);
+        Turtle_Draw(&tree);
 
-                for (size_t x = 7; x > 0; x--)
-                {
-                    Turtle_Line(&t, 30);
-                    Turtle_Turn(&t, 30 - (x * TURN_FACTOR));
-                }
-
-                t.rotation = last_angle;
-                Turtle_Turn(&t, 180);
-            }
-        }
-
-        Turtle_Turn(&t, -0.1);
-
-        Turtle_Draw(&t);
         // FadeText_Render(&tf_name, (Vector2){10, 10}, 48, (DropShadow_RenderConfig){.type = FT_DROPSHADOW, .ds = {
         //                                                                                                       .offset = {2, 2},
         //                                                                                                       .color = RED,
         //                                                                                                   }});
 
-        GuiSlider((Rectangle){100, 10, 200, 10}, "", "", &TURN_FACTOR, -3, 3);
-        DrawText(TextFormat("%10.2f", t.rotation), 10, 30, 12, GREEN);
+        GuiSlider((Rectangle){100, 10, 200, 10}, "", "", &arm_factor, -3, 3);
+        GuiSlider((Rectangle){100, 20, 400, 10}, "", "", &branch_angle, -200, 200);
+        float tmp = tree_levels;
+        GuiSlider((Rectangle){100, 30, 400, 10}, "", "", &tmp, -10, 50);
+        tree_levels = tmp;
+        DrawText(TextFormat("%10.2f", spirle.rotation), 10, 60, 12, GREEN);
 
         EndDrawing();
+
+        if(20 > GetFPS()){
+            tree_levels = 5;
+        }
     }
 
     return 0;
