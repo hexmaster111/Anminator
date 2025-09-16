@@ -32,7 +32,8 @@ ListDef(Line);
 typedef struct Turtle
 {
     Vector2 pos;
-    float rotation, line_thick;
+    double rotation;
+    float line_thick;
     bool pen_down;
     Color pen_color;
 
@@ -41,14 +42,15 @@ typedef struct Turtle
 } Turtle;
 
 void Turtle_Line(Turtle *t, float length);
-void Turtle_Turn(Turtle *t, float angle);
-void Turtle_Draw(Turtle *t);
-void Turtle_Clear(Turtle *t);
+void Turtle_Turn(Turtle *t, double angle);
+void Turtle_Goto(Turtle *t, Vector2 pos);
+
 void Turtle_PenDown(Turtle *t, Color c, float size);
 void Turtle_PenUp(Turtle *t);
-void Turtle_Turn(Turtle *t, float angle);
-void Turtle_Goto(Turtle *t, Vector2 pos);
 void Turtle_Stamp(Turtle *t, enum Shape shape, Color c, float size);
+
+void Turtle_Draw(Turtle *t);
+void Turtle_Clear(Turtle *t);
 
 #endif //TURTLE_H
 
@@ -57,9 +59,6 @@ void Turtle_Stamp(Turtle *t, enum Shape shape, Color c, float size);
 
 ListImpl(Stamp);
 ListImpl(Line);
-
-
-
 
 void Turtle_Draw(Turtle *t)
 {
@@ -101,7 +100,7 @@ void Turtle_PenDown(Turtle *t, Color c, float size)
 void Turtle_PenUp(Turtle *t) { t->pen_down = false; }
 
 void Turtle_Goto(Turtle *t, Vector2 pos) { t->pos = pos; }
-void Turtle_Turn(Turtle *t, float angle)
+void Turtle_Turn(Turtle *t, double angle)
 {
     t->rotation += angle;
     if (t->rotation > 360)
