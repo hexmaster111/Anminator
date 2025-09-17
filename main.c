@@ -9,8 +9,6 @@
 #define TURTLE_IMPL
 #include "turtle.h"
 
-#define ARRAYLEN(ARRAY) sizeof((ARRAY)) / sizeof((ARRAY[0]))
-
 typedef struct AnmState
 {
     Vector2 center;
@@ -18,11 +16,13 @@ typedef struct AnmState
 
     float lerp_stage_1;
     float lerp_stage_2;
+    float lerp_stage_3;
 } AnmState;
 
 void AnmDraw(AnmState s)
 {
-    const double len = 120.0;
+    double len = Lerp(30, 20, s.lerp_stage_2);
+
     const int turns = 6;
     const double turn_angle = 360.0 / turns;
 
@@ -83,6 +83,22 @@ void AnmDraw(AnmState s)
         DrawCircleV(t.lines.items[i].end, 3, GREEN);
     }
 
+    static Turtle t2 = {0};
+
+    Turtle_Clear(&t2);
+    Turtle_PenDown(&t2, GOLD, 2);
+
+    for (size_t i = 0; i < 1 /* turns */; i++)
+    {
+        Line l = t.lines.items[i];
+        Turtle_Goto(&t2, l.start);
+        t2.rotation = RAD2DEG * Vector2LineAngle(l.start, l.end) ;
+        DrawLine(l.start.x, l.start.y, l.end.x, l.end.y, BLUE);
+        Turtle_Line(&t2, 60);
+        // the start of these lines will be the beginning of each of the spirles
+    }
+
+    Turtle_Draw(&t2);
     Turtle_Clear(&t);
 }
 
@@ -110,6 +126,7 @@ int main()
 
         GuiSlider((Rectangle){0, 0, 100, 16}, "", "", &s.lerp_stage_1, 0, 1);
         GuiSlider((Rectangle){0, 16, 100, 16}, "", "", &s.lerp_stage_2, 0, 1);
+        GuiSlider((Rectangle){0, 32, 100, 16}, "", "", &s.lerp_stage_3, 0, 1);
         EndDrawing();
     }
 
