@@ -20,22 +20,29 @@ typedef struct AnmState
     float lerp_stage_1;
     float lerp_stage_2;
     float lerp_stage_3;
+    float lerp_stage_4;
+
+    float rotation;
 } AnmState;
 
 void AnmDraw(AnmState s)
 {
-    double len = Lerp(30, 20, s.lerp_stage_2);
+    float len = Lerp(30, .1, s.lerp_stage_2);
 
     const int turns = 6;
-    const double turn_angle = 360.0 / turns;
+    const float turn_angle = 360.0 / turns;
+    const int pen_size = 1;
 
     static Turtle t = {0};
 
     // Compute offset to center the shape at s.center
     Vector2 offset = Vector2Subtract(s.center, (Vector2){len * 0.5f, len});
     Turtle_Goto(&t, offset);
+    t.rotation = s.rotation;
 
-    Turtle_PenDown(&t, FG, 3);
+    DrawCircleV(offset, 3, RED);
+
+    Turtle_PenDown(&t, FG, pen_size);
     for (size_t i = 0; i < turns; i++)
     {
         Turtle_Line(&t, len);
@@ -80,28 +87,30 @@ void AnmDraw(AnmState s)
 
     Turtle_Draw(&t);
 
-    for (int i = 0; i < t.lines.count; i++)
-    {
-        DrawCircleV(t.lines.items[i].start, 3, PURPLE);
-        DrawCircleV(t.lines.items[i].end, 3, GREEN);
-    }
+    // for (int i = 0; i < t.lines.count; i++)
+    // {
+    //     DrawCircleV(t.lines.items[i].start, 3, PURPLE);
+    //     DrawCircleV(t.lines.items[i].end, 3, GREEN);
+    // }
 
     static Turtle t2 = {0};
 
     Turtle_Clear(&t2);
-    Turtle_PenDown(&t2, GOLD, 2);
+    Turtle_PenDown(&t2, FG, pen_size);
 
     for (size_t i = 0; i < turns; i++)
     {
         Line l = t.lines.items[i];
         Turtle_Goto(&t2, l.start);
+
         t2.rotation = RAD2DEG * (-Vector2LineAngle(l.end, l.start));
 
-
-        Turtle_Line(&t2, 60);
-
-
-        // the start of these lines will be the beginning of each of the spirles
+        for (size_t x = 7; x > 0; x--)
+        {
+            float turndegs = -Lerp(0, (30.0 / 7.0) * x, s.lerp_stage_4);
+            Turtle_Turn(&t2, turndegs);
+            Turtle_Line(&t2, Lerp(0, 30, s.lerp_stage_3));
+        }
     }
 
     Turtle_Draw(&t2);
@@ -130,9 +139,17 @@ int main()
         ClearBackground(BG);
         AnmDraw(s);
 
-        GuiSlider((Rectangle){0, 0, 100, 16}, "", "", &s.lerp_stage_1, 0, 1);
-        GuiSlider((Rectangle){0, 16, 100, 16}, "", "", &s.lerp_stage_2, 0, 1);
-        GuiSlider((Rectangle){0, 32, 100, 16}, "", "", &s.lerp_stage_3, 0, 1);
+        int iota = 0;
+        GuiSlider((Rectangle){0, iota, 100, 16}, "", "", &s.lerp_stage_1, 0, 1);
+        iota += 16;
+        GuiSlider((Rectangle){0, iota, 100, 16}, "", "", &s.lerp_stage_2, 0, 1);
+        iota += 16;
+        GuiSlider((Rectangle){0, iota, 100, 16}, "", "", &s.lerp_stage_3, 0, 1);
+        iota += 16;
+        GuiSlider((Rectangle){0, iota, 100, 16}, "", "", &s.lerp_stage_4, 0, 1);
+        iota += 16;
+        GuiSlider((Rectangle){0, iota, 100, 16}, "", "", &s.rotation, 0, 360);
+
         EndDrawing();
     }
 
