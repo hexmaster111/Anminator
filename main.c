@@ -9,6 +9,9 @@
 #define TURTLE_IMPL
 #include "turtle.h"
 
+#define BG (BLACK)
+#define FG (GRAY)
+
 typedef struct AnmState
 {
     Vector2 center;
@@ -32,7 +35,7 @@ void AnmDraw(AnmState s)
     Vector2 offset = Vector2Subtract(s.center, (Vector2){len * 0.5f, len});
     Turtle_Goto(&t, offset);
 
-    Turtle_PenDown(&t, BLACK, 3);
+    Turtle_PenDown(&t, FG, 3);
     for (size_t i = 0; i < turns; i++)
     {
         Turtle_Line(&t, len);
@@ -69,7 +72,7 @@ void AnmDraw(AnmState s)
         Line l = {
             .start = t.lines.items[i].end,
             .end = end,
-            .color = BLACK,
+            .color = FG,
             .thick = t.lines.items[i].thick};
 
         Line_ListPush(&t.lines, l);
@@ -88,13 +91,16 @@ void AnmDraw(AnmState s)
     Turtle_Clear(&t2);
     Turtle_PenDown(&t2, GOLD, 2);
 
-    for (size_t i = 0; i < 1 /* turns */; i++)
+    for (size_t i = 0; i < turns; i++)
     {
         Line l = t.lines.items[i];
         Turtle_Goto(&t2, l.start);
-        t2.rotation = RAD2DEG * Vector2LineAngle(l.start, l.end) ;
-        DrawLine(l.start.x, l.start.y, l.end.x, l.end.y, BLUE);
+        t2.rotation = RAD2DEG * (-Vector2LineAngle(l.end, l.start));
+
+
         Turtle_Line(&t2, 60);
+
+
         // the start of these lines will be the beginning of each of the spirles
     }
 
@@ -121,7 +127,7 @@ int main()
         AnmUpdate(&s);
 
         BeginDrawing();
-        ClearBackground(WHITE);
+        ClearBackground(BG);
         AnmDraw(s);
 
         GuiSlider((Rectangle){0, 0, 100, 16}, "", "", &s.lerp_stage_1, 0, 1);
