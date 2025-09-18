@@ -19,6 +19,7 @@
         "json.h": "c",
         "raygui.h": "c",
         "stdio.h": "c",
-        "cplib.h": "c"
+        "cplib.h": "c",
+        "initializer_list": "c"
     }
 }
