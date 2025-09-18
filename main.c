@@ -108,7 +108,7 @@ void AnmDraw(AnmState *s)
         {
             float turndegs = -Lerp(0, (30.0 / 7.0) * x, s->lerp_stage_4);
             Turtle_Turn(&s->t2, turndegs);
-            Turtle_Line(&s->t2, Lerp(0, 30, s->lerp_stage_3));
+            Turtle_Line(&s->t2, Lerp(0, 15, s->lerp_stage_3));
         }
     }
 
@@ -116,8 +116,34 @@ void AnmDraw(AnmState *s)
     Turtle_Clear(&s->t1);
 }
 
+bool IsStageDone(float f)
+{
+    if (f >= 1.0f)
+        return true;
+
+    return false;
+}
+
 void AnmUpdate(AnmState *s)
 {
+    const float speed = 0.01f;
+
+    if (!IsStageDone(s->lerp_stage_1))
+    {
+        s->lerp_stage_1 += speed;
+    }
+    else if (!IsStageDone(s->lerp_stage_2))
+    {
+        s->lerp_stage_2 += speed;
+    }
+    else if (!IsStageDone(s->lerp_stage_3))
+    {
+        s->lerp_stage_3 += speed;
+    }
+    else if (!IsStageDone(s->lerp_stage_4))
+    {
+        s->lerp_stage_4 += speed;
+    }
 }
 
 int main()

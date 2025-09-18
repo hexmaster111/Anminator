@@ -12,18 +12,11 @@
 #include "turtle.h"
 
 
-
-Font Font_SpaceMono;
-
 int main(int argc, char *argv[])
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
     InitWindow(900, 1000, "Spirle Demo");
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
-
-    Font_SpaceMono = LoadFontEx("SpaceMono-Regular.ttf", 48, NULL, 0);
-    SetTextureFilter(Font_SpaceMono.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
-
 
     Turtle spirle = {0};
 
