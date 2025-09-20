@@ -10,7 +10,7 @@
 #include "turtle.h"
 
 #define BG (BLACK)
-#define FG (GRAY)
+#define FG (WHITE)
 
 typedef struct AnmState
 {
@@ -30,18 +30,18 @@ typedef struct AnmState
 
 void AnmDraw(AnmState *s)
 {
-    float len = Lerp(30, .1, s->lerp_stage_2);
+    float len = Lerp(60, .1, s->lerp_stage_2);
 
     const int turns = 6;
     const float turn_angle = 360.0 / turns;
-    const int pen_size = 1;
+    const int pen_size = 3;
 
     // Compute offset to center the shape at s.center
     Vector2 offset = Vector2Subtract(s->center, (Vector2){len * 0.5f, len});
     Turtle_Goto(&s->t1, offset);
     s->t1.rotation = s->rotation;
 
-    DrawCircleV(offset, 3, RED);
+    // DrawCircleV(offset, 3, RED);
 
     Turtle_PenDown(&s->t1, FG, pen_size);
     for (size_t i = 0; i < turns; i++)
@@ -104,11 +104,18 @@ void AnmDraw(AnmState *s)
 
         s->t2.rotation = RAD2DEG * (-Vector2LineAngle(l.end, l.start));
 
-        for (size_t x = 7; x > 0; x--)
+        const float end_line_len = 200.0;
+        const int segments = 200;
+        const float line_size_per_segment = end_line_len / segments;
+        const float end_rotation = 120.0;
+        const float turn_per_segment = end_rotation / segments;
+
+        for (size_t x = 0; x < segments; x++)
         {
-            float turndegs = -Lerp(0, (30.0 / 7.0) * x, s->lerp_stage_4);
+            float turndegs = -Lerp(0, turn_per_segment, s->lerp_stage_4);
             Turtle_Turn(&s->t2, turndegs);
-            Turtle_Line(&s->t2, Lerp(0, 15, s->lerp_stage_3));
+
+            Turtle_Line(&s->t2, Lerp(0, line_size_per_segment, s->lerp_stage_3));
         }
     }
 
@@ -126,29 +133,42 @@ bool IsStageDone(float f)
 
 void AnmUpdate(AnmState *s)
 {
-    const float speed = 0.01f;
+    const float speed = 0.005f;
 
     if (!IsStageDone(s->lerp_stage_1))
     {
         s->lerp_stage_1 += speed;
     }
-    else if (!IsStageDone(s->lerp_stage_2))
+
+    if (!IsStageDone(s->lerp_stage_2))
     {
-        s->lerp_stage_2 += speed;
+        s->lerp_stage_2 += speed*2;
     }
-    else if (!IsStageDone(s->lerp_stage_3))
+
+    if (!IsStageDone(s->lerp_stage_3))
     {
-        s->lerp_stage_3 += speed;
+        s->lerp_stage_3 += speed*2;
     }
-    else if (!IsStageDone(s->lerp_stage_4))
+
+    if (!IsStageDone(s->lerp_stage_4))
     {
         s->lerp_stage_4 += speed;
+    }
+
+    if (
+        // IsStageDone(s->lerp_stage_1) &&
+        IsStageDone(s->lerp_stage_2) 
+        // IsStageDone(s->lerp_stage_3) &&
+        // IsStageDone(s->lerp_stage_4)
+    )
+    {
+        s->rotation = Wrap(s->rotation += 0.5, 0, 360);
     }
 }
 
 int main()
 {
-    InitWindow(400, 400, "LAM");
+    InitWindow(600, 600, "LAM");
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
     AnmState s = {
@@ -158,6 +178,15 @@ int main()
 
     while (!WindowShouldClose())
     {
+        if (IsKeyPressed(KEY_R))
+        {
+            s.lerp_stage_1 = 0;
+            s.lerp_stage_2 = 0;
+            s.lerp_stage_3 = 0;
+            s.lerp_stage_4 = 0;
+            s.rotation = 0;
+        }
+
         AnmUpdate(&s);
 
         BeginDrawing();
