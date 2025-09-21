@@ -1,3 +1,6 @@
+// cc demo_multistage.c -odemo_multistage -lraylib -lm
+
+
 #include <raylib.h>
 #include <raymath.h>
 
@@ -18,6 +21,7 @@ typedef struct AnmState
     Vector2 center;
 
     /* Controls for the animation, updated by AnmUpdate */
+    float lerp_stage_0;
     float lerp_stage_1;
     float lerp_stage_2;
     float lerp_stage_3;
@@ -135,6 +139,12 @@ void AnmUpdate(AnmState *s)
 {
     const float speed = 0.005f;
 
+    if (!IsStageDone(s->lerp_stage_0))
+    {
+        s->lerp_stage_0 += speed;
+        return;
+    }
+
     if (!IsStageDone(s->lerp_stage_1))
     {
         s->lerp_stage_1 += speed;
@@ -142,12 +152,12 @@ void AnmUpdate(AnmState *s)
 
     if (!IsStageDone(s->lerp_stage_2))
     {
-        s->lerp_stage_2 += speed*2;
+        s->lerp_stage_2 += speed * 2;
     }
 
     if (!IsStageDone(s->lerp_stage_3))
     {
-        s->lerp_stage_3 += speed*2;
+        s->lerp_stage_3 += speed * 2;
     }
 
     if (!IsStageDone(s->lerp_stage_4))
@@ -157,7 +167,7 @@ void AnmUpdate(AnmState *s)
 
     if (
         // IsStageDone(s->lerp_stage_1) &&
-        IsStageDone(s->lerp_stage_2) 
+        IsStageDone(s->lerp_stage_2)
         // IsStageDone(s->lerp_stage_3) &&
         // IsStageDone(s->lerp_stage_4)
     )
@@ -180,6 +190,7 @@ int main()
     {
         if (IsKeyPressed(KEY_R))
         {
+            s.lerp_stage_0 = 0;
             s.lerp_stage_1 = 0;
             s.lerp_stage_2 = 0;
             s.lerp_stage_3 = 0;
