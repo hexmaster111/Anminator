@@ -85,6 +85,14 @@
         return &list->items[idx];                                                 \
     }
 
+
+
+typedef char Char;
+ListDef(Char);
+
+
+
+
 #ifdef LIST_TESTS
 ListDef(int);
 ListImpl(int);

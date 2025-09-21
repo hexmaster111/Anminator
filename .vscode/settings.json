@@ -20,6 +20,8 @@
         "raygui.h": "c",
         "stdio.h": "c",
         "cplib.h": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "textfade.h": "c",
+        "betterlist.h": "c"
     }
 }

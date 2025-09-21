@@ -2,6 +2,7 @@
 #define TEXTFADE_H
 
 #include <raylib.h>
+
 #include "betterlist.h"
 
 #define BIGGER(NUMA, NUMB) (NUMA) > (NUMB) ? (NUMA) : (NUMB)
@@ -11,12 +12,13 @@ typedef char Char;
 
 ListDef(Char);
 
-typedef struct DropShadow_RenderConfig
+typedef struct RenderConfig
 {
     enum
     {
         FT_NORMAL,
-        FT_DROPSHADOW
+        FT_DROPSHADOW,
+        FT_GLITCH
     } type;
     union
     {
@@ -24,10 +26,9 @@ typedef struct DropShadow_RenderConfig
         {
             Vector2 offset;
             Color color;
-        } ds;
+        } dropshadow;
     };
-} DropShadow_RenderConfig;
-
+} RenderConfig;
 
 typedef struct
 {
@@ -39,26 +40,45 @@ typedef struct
     Font *font;
 } FadeText;
 
-
-
-
 // -1 on not found
 ssize_t Char_ListIndexOfLast(ListOfChar *l, Char find);
 
-
 void FadeText_Update(FadeText *ft, int speed);
 bool FadeText_Done(FadeText *tf);
-void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_RenderConfig cfg);
-
-
+void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, RenderConfig cfg);
 
 #endif // TEXTFADE_H
 
 #ifdef TEXTFADE_IMPL
 #undef TEXTFADE_IMPL
 
-ListImpl(Char);
+ListOfChar CharList_FromCString(char *str)
+{
+    int len = strlen(str);
+    return (ListOfChar){
+        .cap = len + 1,
+        .count = len,
+        .items = strdup(str),
+    };
+}
 
+// returns ptr to internal buffer
+const char *CString_FromCharList(ListOfChar ch)
+{
+    static ListOfChar internal_buffer = {0};
+
+    internal_buffer.count = 0;
+
+    for (size_t i = 0; i < ch.count; i++)
+    {
+        Char_ListPush(&internal_buffer, ch.items[i]);
+    }
+
+    Char_ListPush(&internal_buffer, '\0');
+    return internal_buffer.items;
+}
+
+ListImpl(Char);
 
 ssize_t Char_ListIndexOfLast(ListOfChar *l, Char find)
 {
@@ -85,12 +105,13 @@ void FadeText_Update(FadeText *ft, int speed)
     ft->work_color.a += 30;
 }
 
-
-
 bool FadeText_Done(FadeText *tf) { return tf->cur_pos >= tf->word.count; }
 
-void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_RenderConfig cfg)
+void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, RenderConfig cfg)
 {
+    Font font = tf->font != 0 ? *tf->font : GetFontDefault();
+
+
     // i guess this is a memory leek ? not really alloc once and then deallocd by the OS
     static ListOfChar tmp_text_buffer;
     tmp_text_buffer.count = 0;
@@ -104,12 +125,10 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
 
     Char_ListPush(&tmp_text_buffer, 0);
 
-    Font font = tf->font != 0 ? *tf->font : GetFontDefault();
-
     if (cfg.type == FT_DROPSHADOW)
     {
-        Vector2 newpos = Vector2Add(cfg.ds.offset, pos);
-        DrawTextEx(font, tmp_text_buffer.items, newpos, fontsize, 1, cfg.ds.color);
+        Vector2 newpos = Vector2Add(cfg.dropshadow.offset, pos);
+        DrawTextEx(font, tmp_text_buffer.items, newpos, fontsize, 1, cfg.dropshadow.color);
     }
 
     DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->target_color);
@@ -150,12 +169,13 @@ void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, DropShadow_Rende
 
     if (cfg.type == FT_DROPSHADOW)
     {
-        pos = Vector2Add(cfg.ds.offset, pos);
-        DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, cfg.ds.color);
+        pos = Vector2Add(cfg.dropshadow.offset, pos);
+        DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, cfg.dropshadow.color);
     }
 
     DrawTextEx(font, tmp_text_buffer.items, pos, fontsize, 1, tf->work_color);
-}
 
+  
+}
 
 #endif // TEXTFADE_IMPL
