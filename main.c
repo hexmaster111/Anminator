@@ -53,8 +53,6 @@ int main(int argc, char *argv[])
         FadeText_Render(&tf_name, (Vector2){10, 10 + 48 * 3}, 48, (RenderConfig){.type = FT_NORMAL});
 
 
-        FadeText_Render(&tf_name, (Vector2){10, 10 + 48 * 6}, 48, (RenderConfig){.type = FT_GLITCH});
-
         EndDrawing();
     }
 

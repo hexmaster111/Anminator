@@ -18,7 +18,7 @@ typedef struct RenderConfig
     {
         FT_NORMAL,
         FT_DROPSHADOW,
-        FT_GLITCH
+        
     } type;
     union
     {
