@@ -1,3 +1,6 @@
+// cc demo_hexagons.c -odemo_hexagons -lraylib -lm
+
+
 #include <raylib.h>
 #include <raymath.h>
 
