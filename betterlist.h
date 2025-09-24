@@ -87,8 +87,8 @@
 
 
 
-typedef char Char;
-ListDef(Char);
+// typedef char Char;
+// ListDef(Char);
 
 
 
