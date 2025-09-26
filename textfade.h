@@ -35,9 +35,13 @@ typedef struct
     ListOfChar word;
     int cur_pos;
 
+    Vector2 pos;
+
     Color target_color, work_color;
 
     Font *font;
+
+    void *tag;
 } FadeText;
 
 // -1 on not found
@@ -106,6 +110,11 @@ void FadeText_Update(FadeText *ft, int speed)
 }
 
 bool FadeText_Done(FadeText *tf) { return tf->cur_pos >= tf->word.count; }
+
+void FadeText_Render_Stored(FadeText *tf, float fontsize, RenderConfig cfg)
+{
+     FadeText_Render(tf, tf->pos, fontsize, cfg);
+}
 
 void FadeText_Render(FadeText *tf, Vector2 pos, float fontsize, RenderConfig cfg)
 {
