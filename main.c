@@ -14,121 +14,69 @@
 #define TEXTFADE_IMPL
 #include "textfade.h"
 
-/*
-// words per sec or something -- sets the speed of the text fadding in
-<speed(2)>
-This is an example of <bold speeks> a text to speach engine <newline>
-designed to make <large hailey> keep talking <newline>
-// wait 5 secs before going onto the next part of the file
-<delay(5)>
-<clear>
-<move(left_to_right, SLOW)  Keep your eyes here>
-[delay(3)]
-[clear]
-[center_large_text  FEEL<<PLEASURE>>]
-<delay(.7)>
-<clear>
-<togeather(timeoffset: .75)>
-Each line in this block
-is written to the screen
-at the same time
-<end togeather>
-*/
-
-Font Font_SpaceMono;
-FadeText g_faders[1000] = {0};
-
-
-void DoCommand(ListOfChar cmd)
-{
-    
-}
-
-void BuildFaders(ListOfChar fc)
-{
-    size_t currsor = 0;
-    int fadder_idx = 0;
-
-    ListOfChar buffer = {0};
-
-    while (fc.count >= currsor)
-    {
-
-        if (fc.items[currsor] == '[' && fc.items[currsor - 1] != '\\')
-        {
-
-            if (buffer.count > 0)
-            {
-                g_faders[fadder_idx] = (FadeText){
-                    .word = buffer,
-                    .pos = Vector2Zero(),
-                    .work_color = WHITE,
-                    .target_color = WHITE,
-                    .font = &Font_SpaceMono};
-
-                fadder_idx += 1;
-
-                buffer.cap = 0;
-                buffer.items = NULL;
-                buffer.count = NULL;
-            }
-        }
-
-        if (fc.items[currsor] == ']' && fc.items[currsor - 1] != '\\')
-        {
-            if (buffer.count > 0)
-            {
-
-                DoCommand(buffer);
-
-                fadder_idx += 1;
-
-                buffer.cap = 0;
-                buffer.items = NULL;
-                buffer.count = NULL;
-            }
-        }
-
-        Char_ListPush(&buffer, fc.items[currsor]);
-
-        currsor += 1;
-    }
-}
+// GuiSlider((Rectangle){0,0,300,32, }, "", "", &mover.x, -100, 100);
+// GuiSlider((Rectangle){0,32,300,32, }, "", "", &mover.y, -100, 100);
 
 int main(int argc, char *argv[])
 {
 
-    ListOfChar filedata = {0};
-
-    if (argc < 2)
-    {
-        printf("usage %s filename.hyp\n", argv[0]);
-        return 1;
-    }
-
-    if (!FileExists(argv[1]))
-    {
-        printf("file dosent exist! \'%s\'\n", argv[1]);
-        return 1;
-    }
-
-    int data_size;
-    filedata.items = LoadFileData(argv[1], &data_size);
-    filedata.count = data_size;
-    filedata.cap = -1;
-
-    BuildFaders(filedata);
-
-    InitWindow(600, 600, "Reader");
-    SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
-
-    Font_SpaceMono = LoadFontEx("SpaceMono-Regular.ttf", 48, NULL, 0);
-    SetTextureFilter(Font_SpaceMono.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
-
+    InitWindow(800, 600, "Flower");
+    SetTargetFPS(60);
     while (!WindowShouldClose())
     {
+        Vector2 center = (Vector2){GetScreenWidth() / 2.0, GetScreenHeight() / 2.0};
+
         BeginDrawing();
         ClearBackground(WHITE);
+
+        static Vector2 mover = {-61, -20};
+        static float lerpamount = 0;
+        static float lerpamount2 = 0;
+        static float speed = .5;
+        static int amount = 0;
+
+        if(IsKeyPressed(KEY_R)){
+            amount=0;
+            lerpamount=lerpamount2=0;
+        }
+
+        GuiSlider((Rectangle){0, 0, 300, 32}, "", "", &lerpamount, -1, 1);
+        GuiSlider((Rectangle){0, 32, 300, 32}, "", "", &lerpamount2, -1, 1);
+
+        if (1 > lerpamount)
+        {
+            lerpamount += GetFrameTime() * speed;
+        }
+
+        if (lerpamount >= 1 && 1 > lerpamount2)
+        {
+            lerpamount2 += GetFrameTime() * speed;
+        }
+
+        if (lerpamount >= 1  &&  lerpamount2 >= 1)
+        {
+            amount += 1;
+            lerpamount = 0;
+            lerpamount2 = 0;
+        }
+
+        
+        Vector2 pos = center;
+        pos.y = GetScreenHeight() - 20;
+        for (size_t i = 0; i < amount; i++)
+        {
+            DrawRing(pos, 30, 40, 180, 270, 50, GREEN);
+            pos = Vector2Add(pos, mover);
+            DrawRing(pos, 30, 40, -90, 0, 50, GREEN);
+            Vector2 tmp = (Vector2){-mover.x, mover.y};
+            pos = Vector2Add(pos, tmp);
+        }
+
+        DrawRing(pos, 30, 40, 180, Lerp(180, 270, lerpamount), 50, GREEN);
+        pos = Vector2Add(pos, mover);
+        DrawRing(pos, 30, 40, Lerp(0, -90, lerpamount2), 0, 50, GREEN);
+        Vector2 tmp = (Vector2){-mover.x, mover.y};
+        pos = Vector2Add(pos, tmp);
 
         EndDrawing();
     }
