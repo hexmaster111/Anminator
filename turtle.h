@@ -52,13 +52,13 @@ void Turtle_Stamp(Turtle *t, enum Shape shape, Color c, float size);
 void Turtle_Draw(Turtle *t);
 void Turtle_Clear(Turtle *t);
 
-#endif //TURTLE_H
+#endif // TURTLE_H
 
 #ifdef TURTLE_IMPL
 
-
-ListImpl(Stamp);
-ListImpl(Line);
+ListImpl(Stamp)
+ListImpl(Line)
+// foo
 
 void Turtle_Draw(Turtle *t)
 {
@@ -127,6 +127,5 @@ void Turtle_Stamp(Turtle *t, enum Shape shape, Color c, float size)
 {
     Stamp_ListPush(&t->stamps, (Stamp){.pos = t->pos, .shape = shape, .size = size, .c = c});
 }
-
 
 #endif // TURTLE_IMPL
